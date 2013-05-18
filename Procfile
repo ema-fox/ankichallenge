@@ -1,0 +1,1 @@
+web: lein trampline run $PORT
