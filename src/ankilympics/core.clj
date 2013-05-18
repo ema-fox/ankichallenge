@@ -1,5 +1,6 @@
 (ns ankilympics.core
   (:use [noir.server :only [start]]
+        [clojure.data.json :only [write-str]]
         noir.core))
 
 (def points (ref {}))
@@ -9,7 +10,7 @@
 (defpage [:post "/points"] {:keys [name amount]}
   (dosync
    (alter points assoc name amount))
-  (str @points))
+  (write-str {:msg (str @points)}))
 
 (defpage "/" []
   "Huhu!")
