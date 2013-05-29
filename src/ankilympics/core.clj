@@ -3,17 +3,15 @@
         [clojure.data.json :only [write-str]]
         noir.core))
 
-(def points (ref {}))
-
-(def rivals (ref {}))
+(defonce data (ref {:points {}}))
 
 (defpage [:post "/points"] {:keys [name amount]}
   (dosync
-   (alter points assoc name amount))
-  (write-str {:msg (str @points)}))
+   (alter data assoc-in [:points name] amount))
+  (write-str {:msg (str @data)}))
 
 (defpage "/" []
-  (str @points))
+  (str @data))
 
 (defn -main [port]
   (start (Integer. port)))
