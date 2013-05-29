@@ -6,12 +6,15 @@
 (defonce data (ref {:points {}
                     :init-points {}}))
 
+(defn show-points []
+  (str (:points @data)))
+
 (defpage [:post "/points"] {:keys [name amount]}
   (let [amount (Integer. amount)]
     (dosync
      (alter data update-in [:init-points name] #(or % amount))
      (alter data assoc-in [:points name] amount))
-    (write-str {:msg (str @data)})))
+    (write-str {:msg (show-points)})))
 
 (defpage "/" []
   (str @data))
