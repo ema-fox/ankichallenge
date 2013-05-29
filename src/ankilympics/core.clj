@@ -13,7 +13,7 @@
   (write-str {:msg (str @points)}))
 
 (defpage "/" []
-  "Huhu!")
+  (str @points))
 
 (defn -main [port]
   (start (Integer. port)))
