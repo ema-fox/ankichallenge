@@ -3,12 +3,15 @@
         [clojure.data.json :only [write-str]]
         noir.core))
 
-(defonce data (ref {:points {}}))
+(defonce data (ref {:points {}
+                    :init-points {}}))
 
 (defpage [:post "/points"] {:keys [name amount]}
-  (dosync
-   (alter data assoc-in [:points name] amount))
-  (write-str {:msg (str @data)}))
+  (let [amount (Integer. amount)]
+    (dosync
+     (alter data update-in [:init-points name] #(or % amount))
+     (alter data assoc-in [:points name] amount))
+    (write-str {:msg (str @data)})))
 
 (defpage "/" []
   (str @data))
