@@ -1,7 +1,8 @@
 (ns ankilympics.core
   (:use [noir.server :only [start]]
         [clojure.data.json :only [write-str]]
-        noir.core))
+        noir.core
+        hiccup.core))
 
 (defonce data (ref {:points {}
                     :init-points {}}))
@@ -17,7 +18,9 @@
     (write-str {:msg (show-points)})))
 
 (defpage "/" []
-  (str @data))
+  (html
+    [:div (for [[name points] (sort-by > second (:points @data))]
+            [:div (str name ": " points)])]))
 
 (defn -main [port]
   (start (Integer. port)))
