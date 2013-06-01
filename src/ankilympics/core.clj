@@ -19,7 +19,7 @@
 
 (defpage "/" []
   (html
-    [:div (for [[name points] (sort-by > second (:points @data))]
+    [:div (for [[name points] (sort-by second > (:points @data))]
             [:div (str name ": " points)])]))
 
 (defn -main [port]
