@@ -1,4 +1,4 @@
-(ns ankilympics.core
+(ns ankichallenge.core
   (:use [noir.server :only [start]]
         [clojure.data.json :only [write-str]]
         noir.core
