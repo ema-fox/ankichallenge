@@ -19,8 +19,11 @@
 
 (defpage "/" []
   (html
-    [:div (for [[name points] (sort-by second > (:points @data))]
-            [:div (str name ": " points)])]))
+   [:h1 "Ankichallenge high score"]
+   [:div (for [[name points]
+               (sort-by second >
+                        (merge-with - (:points @data) (:init-points @data)))]
+           [:div (str name ": " points)])]))
 
 (defn -main [port]
   (start (Integer. port)))
