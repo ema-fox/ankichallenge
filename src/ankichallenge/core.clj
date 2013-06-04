@@ -31,6 +31,7 @@
 
 (defonce data (persref "data.clj"
                        {:points {}
+                        :challengers {}
                         :init-points {}}))
 
 (defn relps [{:keys [points init-points]}]
@@ -41,8 +42,19 @@
 
 (defn update-points [name amount]
   (dosync
-   (alter data update-in [:init-points name] #(or % amount))
-   (alter data assoc-in [:points name] amount)))
+   (let [oldrelps (relps @data)]
+     (alter data update-in [:init-points name] #(or % amount))
+     (alter data assoc-in [:points name] amount)
+     (if-let [before (get oldrelps name)]
+       (let [caught (map first
+                         (filter #(and (< before (second %))
+                                       (<= (second %)
+                                           (- amount (get (:init-points @data)
+                                                          name))))
+                                 oldrelps))]
+         (alter data update-in [:challengers]
+                #(merge-with + % (into {} (for [cname caught]
+                                            [(sort [name cname]) 1])))))))))
 
 (defpage [:post "/points"] {:keys [name amount]}
   (update-points name (Integer. amount))
