@@ -52,9 +52,8 @@
                                            (- amount (get (:init-points @data)
                                                           name))))
                                  oldrelps))]
-         (alter data update-in [:challengers]
-                #(merge-with + % (into {} (for [cname caught]
-                                            [(sort [name cname]) 1])))))))))
+         (alter data update-in [:challengers name]
+                #(merge-with + % (into {} (map #(list % 1) caught)))))))))
 
 (defpage [:post "/points"] {:keys [name amount]}
   (update-points name (Integer. amount))
