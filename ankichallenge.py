@@ -28,7 +28,7 @@ def foo():
                                   'version': version,
                                   'amount': num}),
                 method='POST')[1])
-        except socket.error:
+        except (socket.error, httplib2.ServerNotFoundError):
             pass
         else:
             if resp.has_key('msg'):
