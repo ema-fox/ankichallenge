@@ -2,7 +2,8 @@
   (:use [noir.server :only [start]]
         [clojure.data.json :only [write-str]]
         noir.core
-        hiccup.core)
+        hiccup.core
+        [hiccup.util :only [escape-html]])
   (:import [java.io FileNotFoundException]))
 
 (defn write-to [r path]
@@ -57,14 +58,15 @@
 
 (defpage [:post "/points"] {:keys [name amount]}
   (update-points name (Integer. amount))
-  (write-str {:msg (show-points)}))
+  (write-str {:msg (- (get-in @data [:points name])
+                      (get-in @data [:init-points name]))}))
 
 (defpage "/" []
   (html
    [:h1 "Ankichallenge high score"]
    [:div (for [[name points]
                (sort-by second > (relps @data))]
-           [:div (str name ": " points)])]))
+           [:div (str (escape-html name) ": " points)])]))
 
 (defn -main [port]
   (start (Integer. port)))
