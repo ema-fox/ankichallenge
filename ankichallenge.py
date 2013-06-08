@@ -22,7 +22,7 @@ def foo():
     if mw.col.conf.has_key('ankichallenge-name'):
         num = mw.col.db.scalar('select sum(1) from revlog')
         try:
-            resp = json.loads(httplib2.Http().request(
+            resp = json.loads(httplib2.Http(timeout=3).request(
                 'http://' + hostport + '/points?' +
                 urllib.urlencode({'name': mw.col.conf['ankichallenge-name'],
                                   'version': version,
