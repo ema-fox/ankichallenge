@@ -54,7 +54,11 @@
                                                           name))))
                                  oldrelps))]
          (alter data update-in [:challengers name]
-                #(merge-with + % (into {} (map #(list % 1) caught)))))))))
+                #(merge-with + % (reduce (fn [chals name]
+                                           (assoc chals
+                                             name 1))
+                                         {}
+                                         caught))))))))
 
 (defpage [:post "/points"] {:keys [name amount]}
   (update-points name (Integer. amount))
@@ -70,4 +74,3 @@
 
 (defn -main [port]
   (start (Integer. port)))
-
