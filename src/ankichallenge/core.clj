@@ -38,6 +38,9 @@
 (defn relps [{:keys [points init-points]}]
   (merge-with - points init-points))
 
+(defn relp [{:keys [points init-points]} name]
+  (- (get points name) (get init-points name)))
+
 (defn show-points []
   (str (:points @data)))
 
@@ -54,21 +57,29 @@
      (alter data update-in [:init-points name] #(or % amount))
      (alter data assoc-in [:points name] amount)
      (if-let [before (get oldrelps name)]
-       (let [[_ xs ys] (passed before
-                               (- amount (get (:init-points @data) name))
-                               oldrelps)
-             caught (concat xs ys)]
-         (alter data update-in [:challengers name]
-                #(merge-with + % (reduce (fn [chals name]
-                                           (assoc chals
-                                             name 1))
-                                         {}
-                                         caught))))))))
+       (let [after (relp @data name)]
+         (when (< before after)
+           (let [[_ xs ys] (passed before
+                                   after
+                                   oldrelps)
+                 caught (concat xs ys)]
+             (alter data update-in [:challengers name]
+                    #(merge-with + % (reduce (fn [chals name]
+                                               (assoc chals
+                                                 name 1))
+                                             {}
+                                             caught))))))))))
+
+(defn next-challenger [dt name]
+  (let [rs (relps dt)]
+    (first (sort-by second (filter #(< (get rs name) (second %)) rs)))))
 
 (defpage [:post "/points"] {:keys [name amount]}
   (update-points name (Integer. amount))
-  (write-str {:msg (- (get-in @data [:points name])
-                      (get-in @data [:init-points name]))}))
+  (write-str {:msg (str (relp @data name)
+                        (if-let [[cname crp] (next-challenger @data name)]
+                          (str ", " (- crp (relp @data name)) " points to "
+                               cname)))}))
 
 (defpage "/" []
   (html
