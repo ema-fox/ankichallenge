@@ -41,18 +41,23 @@
 (defn show-points []
   (str (:points @data)))
 
+(defn passed [before after rs]
+  (map (fn [f]
+         (map first (filter #(f (second %)) rs)))
+       [#(= before %)
+        #(< before % after)
+        #(= % after)]))
+
 (defn update-points [name amount]
   (dosync
    (let [oldrelps (relps @data)]
      (alter data update-in [:init-points name] #(or % amount))
      (alter data assoc-in [:points name] amount)
      (if-let [before (get oldrelps name)]
-       (let [caught (map first
-                         (filter #(and (< before (second %))
-                                       (<= (second %)
-                                           (- amount (get (:init-points @data)
-                                                          name))))
-                                 oldrelps))]
+       (let [[_ xs ys] (passed before
+                               (- amount (get (:init-points @data) name))
+                               oldrelps)
+             caught (concat xs ys)]
          (alter data update-in [:challengers name]
                 #(merge-with + % (reduce (fn [chals name]
                                            (assoc chals
