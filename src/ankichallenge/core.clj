@@ -74,12 +74,19 @@
   (let [rs (relps dt)]
     (first (sort-by second (filter #(< (get rs name) (second %)) rs)))))
 
+(defn percent-challenger [dt name]
+  (if (get-in dt [:points name])
+    (if-let [[cname crp] (next-challenger dt name)]
+      (str (int (* (/ (relp dt name) crp) 100)) "% to " cname)
+      "9001% to being the best")))
+
 (defpage [:post "/points"] {:keys [name amount]}
-  (update-points name (Integer. amount))
-  (write-str {:msg (str (relp @data name)
-                        (if-let [[cname crp] (next-challenger @data name)]
-                          (str ", " (- crp (relp @data name)) " points to "
-                               cname)))}))
+  (let [oldpc (percent-challenger @data name)]
+    (update-points name (Integer. amount))
+    (write-str {:msg (let [newpc (percent-challenger @data name)]
+                       (if (not= oldpc newpc)
+                         newpc
+                         (str (relp @data name) " points")))})))
 
 (defpage "/" []
   (html
