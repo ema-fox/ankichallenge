@@ -70,14 +70,16 @@
                                              {}
                                              caught))))))))))
 
-(defn next-challenger [dt name]
+(defn next-challenger [dt name direction]
   (let [rs (relps dt)]
-    (first (sort-by second (filter #(< (get rs name) (second %)) rs)))))
+    (first (sort-by second direction (filter #(direction (get rs name) (second %)) (dissoc rs name))))))
 
 (defn percent-challenger [dt name]
   (if (get-in dt [:points name])
-    (if-let [[cname crp] (next-challenger dt name)]
-      (str (int (* (/ (relp dt name) crp) 100)) "% to " cname)
+    (if-let [[cname crp] (next-challenger dt name <)]
+      (let [[_ foorp] (or (next-challenger dt name >=) [nil 0])]
+        (str (int (* (/ (- (relp dt name) foorp) (- crp foorp)) 100))
+             "% to " cname))
       "9001% to being the best")))
 
 (defpage [:post "/points"] {:keys [name amount]}
